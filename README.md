@@ -9,4 +9,4 @@ Inspired by minikeyvalue by @geohot
   - Some kind of security? Maybe? 
   - Create topics? Or some kind of queue separation
   - Return specific message when the queue is empty
-  - Dead lettering?
+  - Queue length and message size restrictions 
