@@ -15,7 +15,7 @@ type Message struct {
 var db *leveldb.DB
 
 // Keys are generated as unique and incremental so that we can leverage the fact that LevelDB stores key value pairs
-// in order based on the key. using characters "a"-"z" we have of 15^26 or 1,677,259,342,285,725,925,376 possible keys.
+// in order based on the key. using characters "a"-"z" we have of 26^15 or 1,677,259,342,285,725,925,376 possible keys.
 // Keys also reset if the queue is emptied. Based on this we can assume that we should never run out of keys.
 var firstKey = "aaaaaaaaaaaaaaa"
 
