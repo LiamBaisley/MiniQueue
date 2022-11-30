@@ -30,16 +30,6 @@ func main() {
 	}
 	defer db.Close()
 
-	iter := db.NewIterator(nil, nil)
-	for iter.Next() {
-		// Remember that the contents of the returned slice should not be modified, and
-		// only valid until the next call to Next.
-		key := iter.Key()
-		value := iter.Value()
-		fmt.Printf("Key: %v Value: %v \n", string(key), string(value))
-	}
-	iter.Release()
-
 	r := gin.Default()
 
 	//Returns the next message in the Queue
