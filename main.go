@@ -71,10 +71,15 @@ func getMessageHandler(c *gin.Context) {
 	iter.First()
 	Value := iter.Value()
 	defer Delete(iter.Key())
-	fmt.Printf("the value is %v", string(Value))
-	c.JSON(http.StatusOK, gin.H{
-		"message": string(Value),
-	})
+
+	if Value == nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "message not found"})
+	} else {
+
+		c.JSON(http.StatusOK, gin.H{
+			"message": string(Value),
+		})
+	}
 }
 
 // Handler for adding messages
