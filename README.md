@@ -8,5 +8,4 @@ Inspired by minikeyvalue by @geohot
   - Command line arguments for configuration
   - Some kind of security? Maybe? 
   - Create topics? Or some kind of queue separation
-  - Return specific message when the queue is empty
   - Queue length and message size restrictions 
