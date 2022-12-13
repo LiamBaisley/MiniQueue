@@ -38,7 +38,6 @@ func WriteConfig(config Config) bool {
 	return result
 }
 
-// Todo: switch to OS instead of ioutil
 func ReadFile() []byte {
 	content, err := os.ReadFile(ConfigFileName)
 	if err != nil {
@@ -48,7 +47,6 @@ func ReadFile() []byte {
 	return content
 }
 
-// Todo: switch to OS instead of ioutil
 func WriteFile(content []byte) (bool, error) {
 	err := os.WriteFile(ConfigFileName, content, 0644)
 	if err != nil {
