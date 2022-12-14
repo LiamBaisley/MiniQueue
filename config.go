@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 )
 
@@ -53,4 +54,14 @@ func WriteFile(content []byte) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func CheckFileExist(filename string) bool {
+	if _, err := os.Stat("./" + filename); err == nil {
+		return true
+	} else if errors.Is(err, os.ErrNotExist) {
+		return false
+	} else {
+		panic("Could not determine if the file does or does not exist.")
+	}
 }

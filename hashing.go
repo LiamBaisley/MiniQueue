@@ -8,11 +8,7 @@ func CreateHash(value string) (string, error) {
 	pass := []byte(value)
 	hash, err := bcrypt.GenerateFromPassword(pass, bcrypt.DefaultCost)
 
-	if err != nil {
-		return "", err
-	}
-
-	return string(hash), nil
+	return string(hash), err
 }
 
 func CompareHash(hash string, password string) (bool, error) {
