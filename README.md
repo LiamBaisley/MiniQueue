@@ -6,4 +6,5 @@ Inspired by minikeyvalue by @geohot
 
 ## Todo
   - Create topics? Or some kind of queue separation
-  - Queue length and message size restrictions 
+  - Queue length and message size restrictions
+  - Confirmation of message consumption
