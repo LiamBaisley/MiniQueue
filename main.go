@@ -42,7 +42,7 @@ func main() {
 			panic("Could not hash security string.")
 		}
 
-		if WriteConfig(config) == false {
+		if WriteConfig(config) {
 			panic("Could not write config file. Stopping program")
 		}
 	} else {
@@ -63,6 +63,8 @@ func main() {
 	r.GET("/getNextMessage", getMessageHandler)
 	//Adds a new message to the queue
 	r.POST("/postMessage", AddMessageHandler)
+	//Confirm consumption of a message before deletion
+	r.POST("/confirm", ConfirmConsumptionHandler)
 
 	r.Run(":8080")
 }
@@ -95,11 +97,10 @@ func Delete(key []byte) bool {
 // Handler for getting the next message in the queue
 func getMessageHandler(c *gin.Context) {
 	var secret = c.Request.Header["Authorization"]
-	if result, _ := CompareHash(config.SecurityHash, secret[0]); result == true {
+	if result, _ := CompareHash(config.SecurityHash, secret[0]); result {
 		iter := db.NewIterator(nil, nil)
 		iter.First()
 		Value := iter.Value()
-		defer Delete(iter.Key())
 
 		if Value == nil {
 			c.JSON(http.StatusNotFound, gin.H{"message": "message not found"})
@@ -107,6 +108,7 @@ func getMessageHandler(c *gin.Context) {
 
 			c.JSON(http.StatusOK, gin.H{
 				"message": string(Value),
+				"key":     string(iter.Key()),
 			})
 		}
 	} else {
@@ -120,7 +122,7 @@ func getMessageHandler(c *gin.Context) {
 func AddMessageHandler(c *gin.Context) {
 	var newMessage Message
 	var secret = c.Request.Header["Authorization"]
-	if result, _ := CompareHash(config.SecurityHash, secret[0]); result == true {
+	if result, _ := CompareHash(config.SecurityHash, secret[0]); result {
 		if err := c.BindJSON(&newMessage); err != nil {
 			fmt.Println("There was an error binding json")
 			return
@@ -132,6 +134,25 @@ func AddMessageHandler(c *gin.Context) {
 		if !success {
 			return
 		}
+
+		c.IndentedJSON(http.StatusOK, key)
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Unauthorized.",
+		})
+	}
+}
+
+func ConfirmConsumptionHandler(c *gin.Context) {
+	var secret = c.Request.Header["Authorization"]
+	var key string
+	if result, _ := CompareHash(config.SecurityHash, secret[0]); result {
+		if err := c.BindJSON(&key); err != nil {
+			fmt.Println("There was an error binding json")
+			return
+		}
+
+		Delete([]byte(key))
 
 		c.IndentedJSON(http.StatusOK, key)
 	} else {
