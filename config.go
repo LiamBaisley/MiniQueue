@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 )
 
@@ -30,10 +31,10 @@ func WriteConfig(config Config, filename string) bool {
 	}
 
 	result, err := WriteFile(content, filename)
-	if err != nil {
+	if err != nil || !result {
 		panic("Could not write file")
 	}
-
+	fmt.Print(result)
 	return result
 }
 

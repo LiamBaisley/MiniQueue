@@ -48,7 +48,7 @@ func main() {
 			panic("Could not hash security string.")
 		}
 
-		if WriteConfig(config, ConfigFileName) {
+		if result := WriteConfig(config, ConfigFileName); !result {
 			panic("Could not write config file. Stopping program")
 		}
 	} else {
