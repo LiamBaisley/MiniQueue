@@ -6,14 +6,12 @@ import (
 	"os"
 )
 
-const ConfigFileName = "config.json"
-
 type Config struct {
 	SecurityHash string
 }
 
-func GetConfig() Config {
-	content := ReadFile()
+func GetConfig(filename string) Config {
+	content := ReadFile(filename)
 
 	config := Config{}
 	err := json.Unmarshal(content, &config)
@@ -25,13 +23,13 @@ func GetConfig() Config {
 	return config
 }
 
-func WriteConfig(config Config) bool {
+func WriteConfig(config Config, filename string) bool {
 	content, err := json.Marshal(config)
 	if err != nil {
 		panic("Could not marshal json")
 	}
 
-	result, err := WriteFile(content)
+	result, err := WriteFile(content, filename)
 	if err != nil {
 		panic("Could not write file")
 	}
@@ -39,8 +37,8 @@ func WriteConfig(config Config) bool {
 	return result
 }
 
-func ReadFile() []byte {
-	content, err := os.ReadFile(ConfigFileName)
+func ReadFile(filename string) []byte {
+	content, err := os.ReadFile(filename)
 	if err != nil {
 		panic("file does not exist")
 	}
@@ -48,8 +46,8 @@ func ReadFile() []byte {
 	return content
 }
 
-func WriteFile(content []byte) (bool, error) {
-	err := os.WriteFile(ConfigFileName, content, 0644)
+func WriteFile(content []byte, filename string) (bool, error) {
+	err := os.WriteFile(filename, content, 0644)
 	if err != nil {
 		return false, err
 	}

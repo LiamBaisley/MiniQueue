@@ -21,6 +21,8 @@ var config Config
 // Keys also reset if the queue is emptied. Based on this we can assume that we should never run out of keys.
 var firstKey = "aaaaaaaaaaaaaaa"
 
+const ConfigFileName = "config.json"
+
 func main() {
 	var secret string
 	var existing bool
@@ -34,7 +36,7 @@ func main() {
 
 	if existing && CheckFileExist(ConfigFileName) {
 		fmt.Println("Found existing config file. Using existing config.")
-		config = GetConfig()
+		config = GetConfig(ConfigFileName)
 	} else if !existing && secret != "" || secret != "secret" {
 		config.SecurityHash, hashErr = CreateHash(secret)
 
@@ -42,7 +44,7 @@ func main() {
 			panic("Could not hash security string.")
 		}
 
-		if WriteConfig(config) {
+		if WriteConfig(config, ConfigFileName) {
 			panic("Could not write config file. Stopping program")
 		}
 	} else {
