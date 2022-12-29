@@ -13,6 +13,10 @@ type Message struct {
 	Message string
 }
 
+type Key struct {
+	Key string
+}
+
 var db *leveldb.DB
 var config Config
 
@@ -61,6 +65,9 @@ func main() {
 
 	r := gin.Default()
 
+	r.Use(messageSizeMiddleware)
+	r.Use(authMiddleware)
+
 	//Returns the next message in the Queue
 	r.GET("/message", getMessageHandler)
 	//Adds a new message to the queue
@@ -96,26 +103,39 @@ func Delete(key []byte) bool {
 	return true
 }
 
+// Message size limitation to 5mb
+func messageSizeMiddleware(c *gin.Context) {
+	size := c.Request.ContentLength
+
+	if size > 5000000 {
+		c.AbortWithStatusJSON(413, gin.H{"error": "Message too large"})
+	}
+
+	c.Next()
+}
+
+// Authorize the user
+func authMiddleware(c *gin.Context) {
+	var secret = c.Request.Header["Authorization"]
+	if result, _ := CompareHash(config.SecurityHash, secret[0]); !result {
+		c.AbortWithStatusJSON(401, gin.H{"error": "Unathorized"})
+	}
+	c.Next()
+}
+
 // Handler for getting the next message in the queue
 func getMessageHandler(c *gin.Context) {
-	var secret = c.Request.Header["Authorization"]
-	if result, _ := CompareHash(config.SecurityHash, secret[0]); result {
-		iter := db.NewIterator(nil, nil)
-		iter.First()
-		Value := iter.Value()
+	iter := db.NewIterator(nil, nil)
+	iter.First()
+	Value := iter.Value()
 
-		if Value == nil {
-			c.JSON(http.StatusNotFound, gin.H{"message": "message not found"})
-		} else {
-
-			c.JSON(http.StatusOK, gin.H{
-				"message": string(Value),
-				"key":     string(iter.Key()),
-			})
-		}
+	if Value == nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "message not found"})
 	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "Unauthorized.",
+
+		c.JSON(http.StatusOK, gin.H{
+			"message": string(Value),
+			"key":     string(iter.Key()),
 		})
 	}
 }
@@ -123,43 +143,29 @@ func getMessageHandler(c *gin.Context) {
 // Handler for adding messages
 func AddMessageHandler(c *gin.Context) {
 	var newMessage Message
-	var secret = c.Request.Header["Authorization"]
-	if result, _ := CompareHash(config.SecurityHash, secret[0]); result {
-		if err := c.BindJSON(&newMessage); err != nil {
-			fmt.Println("There was an error binding json")
-			return
-		}
-		key := GenerateKey()
-
-		success := Add([]byte(key), []byte(newMessage.Message))
-
-		if !success {
-			return
-		}
-
-		c.IndentedJSON(http.StatusOK, key)
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "Unauthorized.",
-		})
+	if err := c.BindJSON(&newMessage); err != nil {
+		fmt.Println("There was an error binding json")
+		return
 	}
+	key := GenerateKey()
+
+	success := Add([]byte(key), []byte(newMessage.Message))
+
+	if !success {
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, key)
 }
 
 func ConfirmConsumptionHandler(c *gin.Context) {
-	var secret = c.Request.Header["Authorization"]
-	var key string
-	if result, _ := CompareHash(config.SecurityHash, secret[0]); result {
-		if err := c.BindJSON(&key); err != nil {
-			fmt.Println("There was an error binding json")
-			return
-		}
-
-		Delete([]byte(key))
-
-		c.IndentedJSON(http.StatusOK, key)
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "Unauthorized.",
-		})
+	var Key Key
+	if err := c.BindJSON(&Key); err != nil {
+		fmt.Println("There was an error binding json")
+		return
 	}
+
+	Delete([]byte(Key.Key))
+
+	c.IndentedJSON(http.StatusOK, Key)
 }
