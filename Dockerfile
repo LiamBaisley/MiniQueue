@@ -10,4 +10,4 @@ RUN go build -v -o miniq .
 
 EXPOSE 8080
 
-CMD [ "./miniq", "-s", "secret" ]
+CMD [ "./miniq", "-e"]

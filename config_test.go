@@ -8,7 +8,6 @@ import (
 
 var testConfigFileName = "testConfig.json"
 var TestConfig Config
-var hashErr error
 
 func TestFileExist_GivenExistingFile_ShouldReturnTrue(t *testing.T) {
 	filename := "main.go"

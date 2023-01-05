@@ -30,7 +30,6 @@ const ConfigFileName = "config.json"
 func main() {
 	var secret string
 	var existing bool
-	var hashErr error
 	fmt.Println("MiniQ is running...")
 
 	flag.StringVar(&secret, "s", "secret", "Used to configure the secret used to verify communications with the Queue.")
@@ -42,11 +41,7 @@ func main() {
 		fmt.Println("Found existing config file. Using existing config.")
 		config = GetConfig(ConfigFileName)
 	} else if !existing && secret != "" || secret != "secret" {
-		config.SecurityHash, hashErr = CreateHash(secret)
-
-		if hashErr != nil {
-			panic("Could not hash security string.")
-		}
+		config.Secret = secret
 
 		if result := WriteConfig(config, ConfigFileName); !result {
 			panic("Could not write config file. Stopping program")
@@ -117,8 +112,8 @@ func messageSizeMiddleware(c *gin.Context) {
 // Authorize the user
 func authMiddleware(c *gin.Context) {
 	var secret = c.Request.Header["Authorization"]
-	if result, _ := CompareHash(config.SecurityHash, secret[0]); !result {
-		c.AbortWithStatusJSON(401, gin.H{"error": "Unathorized"})
+	if secret[0] != config.Secret {
+		c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
 	}
 	c.Next()
 }

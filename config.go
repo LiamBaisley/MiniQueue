@@ -8,7 +8,7 @@ import (
 )
 
 type Config struct {
-	SecurityHash string
+	Secret string
 }
 
 func GetConfig(filename string) Config {
