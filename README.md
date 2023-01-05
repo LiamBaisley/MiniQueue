@@ -22,17 +22,10 @@ This project was written to be easy to use and understand. Removing a lot of the
 
 # Usage
 ## Docker
-### Via powershell script
-**First, open the dockerfile:** <br />
-![image](https://user-images.githubusercontent.com/50359625/210170553-0719bc33-575e-4800-a112-c58260771e9c.png)<br />
-**Replace "secret" on line 13 with a secret string of your choosing. This will be used to verify your communications with the queue, remember to add this to the Authorization header of all your requests.**
-There is a powershell script included in the project which wraps the docker commands in an easy to use script. Simply run ./Build/BuildAndRun.ps1 and provide the inputs to the prompt when requested. 
-* The prompt will ask for:
-  - A port to run the application on
 ### Using docker commands
-**First, open the dockerfile:** <br />
-![image](https://user-images.githubusercontent.com/50359625/210170553-0719bc33-575e-4800-a112-c58260771e9c.png)<br />
-**Replace "secret" on line 13 with a secret string of your choosing. This will be used to verify your communications with the queue, remember to add this to the Authorization header of all your requests.**
+**First, open the config.json file:** <br />
+![Uploading image.png…]()<br />
+**Add a secret between the "". This will be used to verify your communications with the queue, remember to add this to the Authorization header of all your requests.**
 
 In a shell of your preference: 
 * Run: Docker build -t miniq .
