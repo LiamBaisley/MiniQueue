@@ -1,5 +1,11 @@
 package main
 
+import (
+	"fmt"
+	"strings"
+	"time"
+)
+
 // Uses the first key if there are no messages in the queue, otherwise incrememts and returns the last key in the queue.
 func GenerateKey() string {
 	iter := db.NewIterator(nil, nil)
@@ -7,14 +13,20 @@ func GenerateKey() string {
 	var newKey string
 
 	if !first {
-		return firstKey
+		return fmt.Sprintf("%v-%v", getCurrentDateAsString(), firstKey)
 	} else {
 		iter.Last()
 		currKey := iter.Key()
-		newKey = IncrementKey(currKey, currKey[len(currKey)-1], len(currKey)-1)
+		splitKey := strings.Split(string(currKey), "-")
+		keyDate := splitKey[0]
+		if keyDate == getCurrentDateAsString() {
+			keyToIncrement := []byte(splitKey[1])
+			newKey = IncrementKey(keyToIncrement, keyToIncrement[len(keyToIncrement)-1], len(keyToIncrement)-1)
+			return fmt.Sprintf("%v-%v", getCurrentDateAsString(), newKey)
+		} else {
+			return fmt.Sprintf("%v-%v", getCurrentDateAsString(), firstKey)
+		}
 	}
-
-	return newKey
 }
 
 // Recursively goes through the characters in the key to determine which to increment.
@@ -33,4 +45,9 @@ func IncrementKey(key []byte, currentByte byte, index int) string {
 	}
 
 	return string(key)
+}
+
+func getCurrentDateAsString() string {
+	year, month, day := time.Now().Date()
+	return fmt.Sprintf("%v%v%v", year, int(month), day)
 }

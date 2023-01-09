@@ -21,8 +21,8 @@ var db *leveldb.DB
 var config Config
 
 // Keys are generated as unique and incremental so that we can leverage the fact that LevelDB stores key value pairs
-// in order based on the key. using characters "a"-"z" we have of 26^15 or 1,677,259,342,285,725,925,376 possible keys.
-// Keys also reset if the queue is emptied. Based on this we can assume that we should never run out of keys.
+// in order based on the key. The characters of the string are appended to the current date represented as a number in this format: 202319-aaaaaaaaaaaaaaa.
+// This means that for any given day we could have 26^15 keys and should never have to worry about running out of keys.
 var firstKey = "aaaaaaaaaaaaaaa"
 
 const ConfigFileName = "config.json"
