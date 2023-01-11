@@ -49,3 +49,6 @@ In a shell of your preference:
   
 ## Todo
   - Create topics? Or some kind of queue separation
+  - Timestamp queue messages
+  - Distribute and replicate queue for higher fault tolerance
+  - add functionality to read entire queue at once. 
