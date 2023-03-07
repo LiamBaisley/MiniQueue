@@ -1,16 +1,19 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
+	"time"
 
 	gin "github.com/gin-gonic/gin"
 	leveldb "github.com/syndtr/goleveldb/leveldb"
 )
 
 type Message struct {
-	Message string
+	Message   string
+	Timestamp string
 }
 
 type Key struct {
@@ -127,10 +130,16 @@ func getMessageHandler(c *gin.Context) {
 	if Value == nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "message not found"})
 	} else {
+		message := Message{}
+		err := json.Unmarshal(Value, &message)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "there was a server error"})
+		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"message": string(Value),
-			"key":     string(iter.Key()),
+			"message":   string(message.Message),
+			"timestamp": string(message.Timestamp),
+			"key":       string(iter.Key()),
 		})
 	}
 }
@@ -143,9 +152,14 @@ func AddMessageHandler(c *gin.Context) {
 		return
 	}
 	key := GenerateKey()
-
-	success := Add([]byte(key), []byte(newMessage.Message))
-
+	newMessage.Timestamp = time.Now().Format(time.RFC3339Nano)
+	content, err := json.Marshal(newMessage)
+	success := true
+	if err == nil {
+		success = Add([]byte(key), []byte(content))
+	} else {
+		success = false
+	}
 	if !success {
 		return
 	}
