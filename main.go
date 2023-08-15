@@ -56,8 +56,7 @@ func main() {
 	var err error
 	db, err = leveldb.OpenFile("./testDB", nil)
 	if err != nil {
-		fmt.Printf("there was an error")
-		panic("panicking")
+		fmt.Printf("there was an error opening the DB file %s", err)
 	}
 	defer db.Close()
 
@@ -76,29 +75,32 @@ func main() {
 	r.Run(":8080")
 }
 
-func Get(key string) string {
-	data, _ := db.Get([]byte(key), nil)
-	return string(data)
+func Get(key string) (string, error) {
+	data, err := db.Get([]byte(key), nil)
+	if err != nil {
+		return "", fmt.Errorf("GetKey: there was an error retrieving the key %w", err)
+	}
+	return string(data), nil
 }
 
-func Add(key []byte, val []byte) bool {
+func Add(key []byte, val []byte) error {
 	err := db.Put(key, val, nil)
 
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("AddKey: There was an error adding the key %w", err)
 	}
 
-	return true
+	return nil
 }
 
-func Delete(key []byte) bool {
+func Delete(key []byte) error {
 	err := db.Delete(key, nil)
 
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("DeleteKey: There was an error removing the key %w", err)
 	}
 
-	return true
+	return nil
 }
 
 // Message size limitation to 5mb
@@ -148,20 +150,20 @@ func getMessageHandler(c *gin.Context) {
 func AddMessageHandler(c *gin.Context) {
 	var newMessage Message
 	if err := c.BindJSON(&newMessage); err != nil {
-		fmt.Println("There was an error binding json")
-		return
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err})
 	}
-	key := GenerateKey()
+	key, err := GenerateKey()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err})
+	}
 	newMessage.Timestamp = time.Now().Format(time.RFC3339Nano)
 	content, err := json.Marshal(newMessage)
-	success := true
-	if err == nil {
-		success = Add([]byte(key), []byte(content))
-	} else {
-		success = false
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err})
 	}
-	if !success {
-		return
+	adderr := Add([]byte(key), []byte(content))
+	if adderr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": adderr})
 	}
 
 	c.IndentedJSON(http.StatusOK, key)
@@ -170,11 +172,13 @@ func AddMessageHandler(c *gin.Context) {
 func ConfirmConsumptionHandler(c *gin.Context) {
 	var Key Key
 	if err := c.BindJSON(&Key); err != nil {
-		fmt.Println("There was an error binding json")
-		return
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err})
 	}
 
-	Delete([]byte(Key.Key))
+	err := Delete([]byte(Key.Key))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err})
+	}
 
 	c.IndentedJSON(http.StatusOK, Key)
 }

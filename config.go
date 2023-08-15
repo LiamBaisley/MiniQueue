@@ -18,7 +18,7 @@ func GetConfig(filename string) Config {
 	err := json.Unmarshal(content, &config)
 
 	if err != nil {
-		panic("could not unmarshal json")
+		panic("Could not read configuration data.")
 	}
 
 	return config
@@ -27,12 +27,12 @@ func GetConfig(filename string) Config {
 func WriteConfig(config Config, filename string) bool {
 	content, err := json.Marshal(config)
 	if err != nil {
-		panic("Could not marshal json")
+		panic("could not write configuration data")
 	}
 
 	result, err := WriteFile(content, filename)
 	if err != nil || !result {
-		panic("Could not write file")
+		panic("could not write configuration file")
 	}
 	fmt.Print(result)
 	return result
