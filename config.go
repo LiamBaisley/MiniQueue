@@ -11,6 +11,15 @@ type Config struct {
 	Secret string
 }
 
+func GetEnvSecret() (string, error) {
+	secret := os.Getenv("MINIQ-AUTH")
+	if secret == "" {
+		return "", fmt.Errorf("GetEnvSecret: no environment variable could be found.")
+	}
+
+	return secret, nil
+}
+
 func GetConfig(filename string) Config {
 	content := ReadFile(filename)
 

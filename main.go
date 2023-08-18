@@ -21,7 +21,8 @@ type Key struct {
 }
 
 var db *leveldb.DB
-var config Config
+var secret string
+var confirmConsume bool
 
 // Keys are generated as unique and incremental so that we can leverage the fact that LevelDB stores key value pairs
 // in order based on the key. The characters of the string are appended to the current date represented as a number in this format: 202319-aaaaaaaaaaaaaaa.
@@ -31,26 +32,14 @@ var firstKey = "aaaaaaaaaaaaaaa"
 const ConfigFileName = "config.json"
 
 func main() {
-	var secret string
-	var existing bool
 	fmt.Println("MiniQ is running...")
+	flag.BoolVar(&confirmConsume, "c", true, "Whether or not MiniQ should expect users of the Queue to confirm consumption of messages")
+	var secretErr error
 
-	flag.StringVar(&secret, "s", "secret", "Used to configure the secret used to verify communications with the Queue.")
-	flag.BoolVar(&existing, "e", false, "Whether or not to use an existing configuration.")
+	secret, secretErr = GetEnvSecret()
 
-	flag.Parse()
-
-	if existing && CheckFileExist(ConfigFileName) {
-		fmt.Println("Found existing config file. Using existing config.")
-		config = GetConfig(ConfigFileName)
-	} else if !existing && secret != "" || secret != "secret" {
-		config.Secret = secret
-
-		if result := WriteConfig(config, ConfigFileName); !result {
-			panic("Could not write config file. Stopping program")
-		}
-	} else {
-		panic("You need to configure a secret.")
+	if secretErr != nil {
+		panic("No environment secret set.")
 	}
 
 	var err error
@@ -90,6 +79,13 @@ func Add(key []byte, val []byte) error {
 		return fmt.Errorf("AddKey: There was an error adding the key %w", err)
 	}
 
+	if !confirmConsume {
+		err := db.Delete(key, nil)
+		if err != nil {
+			return fmt.Errorf("AddKey: there was an error removing the element from the queue %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -116,8 +112,8 @@ func messageSizeMiddleware(c *gin.Context) {
 
 // Authorize the user
 func authMiddleware(c *gin.Context) {
-	var secret = c.Request.Header["Authorization"]
-	if secret[0] != config.Secret {
+	var authSecret = c.Request.Header["Authorization"]
+	if authSecret[0] != secret {
 		c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
 	}
 	c.Next()
