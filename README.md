@@ -23,9 +23,13 @@ This project was written to be easy to use and understand. Removing a lot of the
 # Usage
 ## Docker
 ### Using docker commands
-**First, open the config.json file:** <br />
-![Uploading image.png…]()<br />
-**Add a secret between the "". This will be used to verify your communications with the queue, remember to add this to the Authorization header of all your requests.**
+**First, open the dockerfile:** <br />
+![image](https://github.com/LiamBaisley/MiniQueue/assets/50359625/76819004-1c1c-4c12-9763-d8d13def784e)
+<br />
+**Replace the secret highlighted in the screenshot above with a strong, secure string of your choice.**
+**If you would like to use the queue without consumption guarantees (not recommended) then add -c to the CMD line in the dockerfile like this:**
+![image](https://github.com/LiamBaisley/MiniQueue/assets/50359625/e83f20b9-a21b-4e35-be74-9da98f6db5b0)
+
 
 In a shell of your preference: 
 * Run: Docker build -t miniq .
@@ -33,6 +37,17 @@ In a shell of your preference:
 * **Example**
   * ![image](https://user-images.githubusercontent.com/50359625/210170503-f239c90b-ee0b-429f-bcef-81e9547f8d44.png)
   * ![image](https://user-images.githubusercontent.com/50359625/210170528-81c78e29-8cba-4fa5-b44f-d82341d55403.png)
+ 
+## Docker Compose
+**First, open the dockerfile:** <br />
+![image](https://github.com/LiamBaisley/MiniQueue/assets/50359625/76819004-1c1c-4c12-9763-d8d13def784e)
+<br />
+**Replace the secret highlighted in the screenshot above with a strong, secure string of your choice.**
+**If you would like to use the queue without consumption guarantees (not recommended) then add -c to the CMD line in the dockerfile like this:**
+![image](https://github.com/LiamBaisley/MiniQueue/assets/50359625/e83f20b9-a21b-4e35-be74-9da98f6db5b0)
+**Run ```docker-compose up``` in your terminal from the project root.** 
+**If you would like to run it detatched (no active terminal output, best when running unsupervised or on a server) run ```docker-compose up -d```**
+**The queue will be available on http://localhost:9000, when running on a server route requests here using something like NGINX or Apache Tomcat** 
 
 ### Once MiniQ is running here are the steps for consumption and publishing of messages:
 **1: To push a message to the Queue**
