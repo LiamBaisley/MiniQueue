@@ -6,7 +6,7 @@ Inspired by minikeyvalue by @geohot
 
 # Features
 ### Security
-MiniQ takes a secret string as an argument on start up. This secret should be provided in Authorization request headers when interacting with the queue to ensure access.
+MiniQ takes a secret string as an argument on start up. This secret should be provided in Authorization request headers when interacting with the queue to ensure access. We recommend using MiniQ behind an API gateway or custom API, as your security token may be vulnerable to [man in the middle attacks]([url](https://en.wikipedia.org/wiki/Man-in-the-middle_attack)) otherwise. A user could obtain your key by intercepting your communications with the Queue from your front end.  
 
 ### Read guarantee
 MiniQ requires users to hit the /confirm endpoint once a message has been consumed so that is can be removed from the Queue. This is to ensure all messages are successfully consumed.
