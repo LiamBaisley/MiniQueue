@@ -12,7 +12,7 @@ MiniQ takes a secret string as an argument on start up. This secret should be pr
 MiniQ requires users to hit the /confirm endpoint once a message has been consumed so that is can be removed from the Queue. This is to ensure all messages are successfully consumed.
 
 ### Fast and lightweight.
-Because MiniQ is less than 1000 lines and written in Go, it is fast ann incredibly lightweight. We take advantage of the features of LevelDB to support this. 
+Because MiniQ is less than 1000 lines and written in Go, it is fast and incredibly lightweight. We take advantage of the features of LevelDB to support this. 
 
 ### Persistent
 MiniQ uses LevelDB as its datastore. This means that even if the queue crashes or the host machine unexpectedly shuts down, all messages in the queue are preserved and can be picked up once the error has been resolved. 
